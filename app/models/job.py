@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum as PyEnum
 from uuid import uuid4
 
 from sqlalchemy import DateTime, Enum as SqlEnum, Integer, String
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.database import Base
 
 
-class JobState(str, Enum):
+class JobState(str, PyEnum):
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -31,7 +31,11 @@ class Job(Base):
     )
 
     state: Mapped[JobState] = mapped_column(
-        SqlEnum(JobState),
+        SqlEnum(
+            JobState,
+            values_callable=lambda enum: [e.value for e in enum],
+            name="jobstate",
+        ),
         default=JobState.PENDING,
     )
 
