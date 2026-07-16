@@ -9,7 +9,7 @@ from alembic import context
 
 from dotenv import load_dotenv
 from app.db.database import Base
-import app.schemas.job  # noqa: F401
+import app.models.job  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
