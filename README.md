@@ -1,5 +1,9 @@
 # QueueCTL
 
+> **Backend Developer Internship Assignment** for **[FlamApp AI](https://flamapp.ai/)**
+
+### [Video Demo](https://youtu.be/your-demo-link)
+
 A production-ready CLI-based background job queue built with **Python**, **PostgreSQL**, and **Redis**. QueueCTL provides reliable background job execution with retries, scheduling, priority queues, timeout handling, logging, monitoring, and a lightweight web dashboard.
 
 ![Architecture](docs/architecture.png)
@@ -57,16 +61,32 @@ git clone https://github.com/sahilmishra03/queuectl-cli.git
 cd queuectl
 ```
 
+### Option 1: Docker Installation
+
+Start the complete development environment (PostgreSQL, Redis, QueueCTL Dashboard, and Workers) with a single command:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+- PostgreSQL
+- Redis
+- QueueCTL application (Dashboard live at `http://localhost:8000` + 3 background workers)
+
+### Option 2: Manual Installation
+
 Create a virtual environment.
 
-### Windows
+#### Windows
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\activate
 ```
 
-### Linux / macOS
+#### Linux / macOS
 
 ```bash
 python3 -m venv .venv
@@ -110,22 +130,6 @@ These values can be updated using:
 ```bash
 queuectl config set max-retries <value>
 ```
-
----
-
-## Docker
-
-Start the complete development environment:
-
-```bash
-docker compose up --build
-```
-
-This starts:
-
-- PostgreSQL
-- Redis
-- QueueCTL application
 
 ---
 
@@ -175,14 +179,6 @@ queuectl config set max-retries 3
 
 ---
 
-## Demo
-
-A complete walkthrough of QueueCTL is available here:
-
-**Video:** https://youtu.be/your-demo-link
-
----
-
 ## Testing
 
 Run all tests:
@@ -206,28 +202,4 @@ Current Status
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-```text
-MIT License
-
-Copyright (c) 2026 Sahil Mishra
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
