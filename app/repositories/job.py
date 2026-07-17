@@ -19,6 +19,10 @@ class JobRepository(BaseRepository):
         stmt = select(Job).where(Job.id == job_id)
         return self.db.scalar(stmt)
 
+    def get_by_id_for_update(self, job_id: str) -> Job | None:
+        stmt = select(Job).where(Job.id == job_id).with_for_update()
+        return self.db.scalar(stmt)
+
     def list(self) -> list[Job]:
         stmt = select(Job)
         return list(self.db.scalars(stmt))
