@@ -23,6 +23,7 @@ def patch_db_session(monkeypatch, db):
     wrapper = SessionWrapper(db)
     monkeypatch.setattr("app.cli.main.SessionLocal", lambda: wrapper)
     monkeypatch.setattr("app.cli.dlq.SessionLocal", lambda: wrapper)
+    monkeypatch.setattr("app.cli.monitor.SessionLocal", lambda: wrapper)
     monkeypatch.setattr("app.db.database.SessionLocal", lambda: wrapper)
 
 
@@ -124,4 +125,11 @@ def test_cli_dlq_list_and_retry(repository, failed_job):
 
     updated = repository.get_by_id(failed_job.id)
     assert updated.state == JobState.PENDING
+
+
+def test_cli_monitor(sample_job):
+    result = runner.invoke(root_app, ["monitor", "--iterations", "1"])
+    assert result.exit_code == 0
+    assert "RAM" in result.stdout or "System" in result.stdout
+    assert "Job States" in result.stdout
 

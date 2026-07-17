@@ -14,6 +14,7 @@ A production-grade, CLI-based background job queue and monitoring system built w
 - **Output Logging**: Captures `stdout` and `stderr` for every job directly to the database (`logs <id>`).
 - **Execution Metrics & Statistics**: Real-time summary of job counts, average execution duration (`duration_ms`), success rate, and timeout metrics (`status`).
 - **Web Dashboard**: Minimal, real-time FastAPI web dashboard featuring dark theme, stats cards, job filtering, detail modal, and auto-refresh (`dashboard start`).
+- **Live Terminal UI (TUI) (`monitor`)**: Rich-powered terminal dashboard taking over the screen to display real-time auto-refreshing progress bars, job states, worker memory (`psutil`), and queue statistics (`monitor`).
 - **Configuration Management**: Persistent local CLI config storage for default retry rules (`config set/list`).
 
 ---
@@ -162,6 +163,13 @@ python -m app.cli.app dashboard start --port 8000
 ```
 Open `http://localhost:8000` in your browser to view the interactive dashboard.
 
+### Launching the Live Terminal UI (TUI) Monitor
+
+```powershell
+# Launch the real-time terminal monitor with auto-refreshing progress bars and RAM usage
+python -m app.cli.app monitor --refresh-interval 1.0
+```
+
 ---
 
 ## Automated Testing & Coverage
@@ -200,8 +208,9 @@ tests/
 ├── test_retry_service.py   # 2 tests verifying exponential backoff calculation (2 ** attempts)
 ├── test_executor.py        # 4 tests verifying command execution, failure, timeout, and output capture
 ├── test_worker.py          # 7 tests verifying job processing states, logging, polling, and priority
-├── test_cli.py             # 9 tests using CliRunner for enqueue, status, list, logs, dead, config, dlq
+├── test_cli.py             # 10 tests using CliRunner for enqueue, status, list, logs, dead, config, dlq, monitor
 ├── test_dashboard.py       # 4 tests using TestClient covering HTML root, /api/stats, /api/jobs, details
+├── test_monitor.py         # 3 tests unit testing TUI layout, system metrics calculation, and iteration loops
 └── test_stats.py           # 2 tests covering empty DB stats and multi-state calculation verification
 ```
 
@@ -216,8 +225,9 @@ tests/
 | **`app.workers.executor`** | **100%** | Subprocess execution & `TimeoutExpired` handling |
 | **`app.services.worker`** | **96%** | Processing loop, state transitions (`TIMED_OUT`, `DEAD`, `COMPLETED`), and logging |
 | **`app.dashboard.dashboard`** | **100%** | FastAPI routes and HTML dashboard generator |
+| **`app.cli.monitor`** | **88%** | Real-time Rich TUI layout, progress bars, and `psutil` memory monitoring |
 | **`app.cli.main` & `dlq`** | **91%** | All CLI subcommands and options |
-| **Overall Project Total** | **85%** | **41 / 41 Tests Passing** |
+| **Overall Project Total** | **85%** | **45 / 45 Tests Passing** |
 
 ---
 
@@ -227,7 +237,7 @@ tests/
 queuectl/
 │
 ├── app/
-│   ├── cli/            # Typer CLI subcommands (app.py, main.py, worker.py, dlq.py, config.py, dashboard.py)
+│   ├── cli/            # Typer CLI subcommands (app.py, main.py, worker.py, dlq.py, config.py, dashboard.py, monitor.py)
 │   ├── core/           # Configuration manager & settings
 │   ├── dashboard/      # FastAPI minimal web dashboard & API routes
 │   ├── db/             # SQLAlchemy engine & Redis client connection
