@@ -1,7 +1,7 @@
-# pyrefly: ignore [missing-import]
 from datetime import datetime
 from typing import Optional
 
+# pyrefly: ignore [missing-import]
 import typer
 
 from app.core import config_manager
@@ -182,4 +182,4 @@ def logs(job_id: str):
 
 if __name__ == "__main__":
     app()
-
+

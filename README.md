@@ -32,6 +32,30 @@ A production-grade, CLI-based background job queue and monitoring system built w
 
 ## Installation & Setup
 
+### 🚀 One-Click Reviewer Setup (Docker)
+
+If you have Docker installed, you can spin up the entire architecture (PostgreSQL, Redis, Worker, and Web Dashboard) in a single command without installing any local dependencies!
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd queuectl
+
+# 2. Start the entire cluster in the background
+docker-compose up -d --build
+```
+
+That's it!
+- The **Dashboard** is now live at [http://localhost:8000](http://localhost:8000).
+- The **Database migrations** run automatically.
+- **3 parallel workers** are already running in the background.
+
+To test it, you can enqueue jobs from your local terminal (just ensure your `.env` points to `localhost` ports) or dive into the dashboard!
+
+---
+
+### Local Manual Setup (Without Docker)
+
 ### 1. Clone the repository
 
 ```bash
