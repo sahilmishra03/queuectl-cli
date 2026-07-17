@@ -1,6 +1,9 @@
-from sqlalchemy import select
+from __future__ import annotations
 
-from app.models.job import Job
+from datetime import datetime
+from sqlalchemy import or_, select
+
+from app.models.job import Job, JobState
 from app.repositories.base import BaseRepository
 
 
@@ -24,6 +27,15 @@ class JobRepository(BaseRepository):
         self.db.commit()
         self.db.refresh(job)
         return job
+
+    def get_retryable_jobs(self) -> list[Job]:
+        stmt = (
+            select(Job)
+            .where(Job.state == JobState.PENDING)
+            .where(Job.next_retry_at.is_not(None))
+            .where(Job.next_retry_at <= datetime.utcnow())
+        )
+        return list(self.db.scalars(stmt))
 
     def delete(self, job: Job) -> None:
         self.db.delete(job)
