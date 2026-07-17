@@ -20,5 +20,5 @@ class DLQService:
             raise ValueError("Job is not in dead letter queue.")
 
         updated_job = self.repository.reset_dead_job(job)
-        self.queue.enqueue(updated_job.id)
+        self.queue.enqueue(updated_job.id, updated_job.priority)
         return updated_job
