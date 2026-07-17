@@ -2,7 +2,7 @@
 
 > **Backend Developer Internship Assignment** for **[FlamApp AI](https://flamapp.ai/)**
 
-### [Video Demo](https://youtu.be/your-demo-link)
+### [Video Demo](https://www.youtube.com/watch?v=PfgGD3AEz64)
 
 A production-ready CLI-based background job queue built with **Python**, **PostgreSQL**, and **Redis**. QueueCTL provides reliable background job execution with retries, scheduling, priority queues, timeout handling, logging, monitoring, and a lightweight web dashboard.
 
