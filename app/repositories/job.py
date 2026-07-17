@@ -40,3 +40,16 @@ class JobRepository(BaseRepository):
     def delete(self, job: Job) -> None:
         self.db.delete(job)
         self.db.commit()
+
+    def get_dead_jobs(self) -> list[Job]:
+        stmt = select(Job).where(Job.state == JobState.DEAD)
+        return list(self.db.scalars(stmt))
+
+    def reset_dead_job(self, job: Job) -> Job:
+        job.state = JobState.PENDING
+        job.attempts = 0
+        job.next_retry_at = None
+        job.last_error = None
+        self.db.commit()
+        self.db.refresh(job)
+        return job
