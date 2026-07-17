@@ -19,9 +19,16 @@ class JobRepository(BaseRepository):
         stmt = select(Job).where(Job.id == job_id)
         return self.db.scalar(stmt)
 
+    def get_by_id_for_update(self, job_id: str) -> Job | None:
+        stmt = select(Job).where(Job.id == job_id).with_for_update()
+        return self.db.scalar(stmt)
+
     def list_all(self) -> list[Job]:
         stmt = select(Job)
         return list(self.db.scalars(stmt))
+
+    def list(self) -> list[Job]:
+        return self.list_all()
 
     def list_by_state(self, state: JobState) -> list[Job]:
         stmt = select(Job).where(Job.state == state)
@@ -104,4 +111,4 @@ class JobRepository(BaseRepository):
             "avg_duration_ms": round(avg_duration, 2) if avg_duration else None,
             "success_rate": round(success_rate, 1),
             "timed_out": timed_out,
-        }
+        }

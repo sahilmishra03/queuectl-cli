@@ -1,3 +1,4 @@
+import signal
 import time
 from datetime import datetime, timezone
 
@@ -18,10 +19,20 @@ class WorkerService:
         self.repository = repository
         self.queue = queue
         self.executor = CommandExecutor()
+        self._shutdown_flag = False
+        try:
+            signal.signal(signal.SIGINT, self._handle_shutdown)
+            signal.signal(signal.SIGTERM, self._handle_shutdown)
+        except ValueError:
+            pass
+
+    def _handle_shutdown(self, signum, frame):
+        print(f"\nReceived signal {signum}. Initiating graceful shutdown...")
+        self._shutdown_flag = True
 
     def start(self):
 
-        while True:
+        while not self._shutdown_flag:
 
             job_id = self.queue.dequeue()
 
@@ -47,9 +58,13 @@ class WorkerService:
 
     def _process(self, job_id: str):
 
-        job = self.repository.get_by_id(job_id)
+        job = self.repository.get_by_id_for_update(job_id)
 
         if not job:
+            return
+
+        if job.state != JobState.PENDING:
+            print(f"Job {job.id} is not in PENDING state (current state: {job.state.value}). Skipping duplicate processing.")
             return
 
         # Mark as processing with start time
@@ -85,6 +100,12 @@ class WorkerService:
                 job.state = JobState.PENDING
                 job.next_retry_at = RetryService().next_retry(job.attempts)
 
+        if result.stdout:
+            print(result.stdout, end="")
+
+        if result.stderr:
+            print(result.stderr, end="")
+
         self.repository.update(job)
 
-        print(f"Job {job.id} finished with state {job.state.value}")
+        print(f"Job {job.id} finished with state {job.state.value}")
