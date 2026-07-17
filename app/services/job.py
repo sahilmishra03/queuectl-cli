@@ -22,9 +22,12 @@ class JobService:
         priority: int = 0,
         timeout: Optional[int] = None,
         run_at: Optional[datetime] = None,
+        job_id: Optional[str] = None,
     ) -> Job:
+        from uuid import uuid4
 
         job = Job(
+            id=job_id or str(uuid4()),
             command=command,
             max_retries=max_retries,
             priority=priority,

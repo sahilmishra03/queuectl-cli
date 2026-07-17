@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "queuectl"
+version = "0.1.0"
+description = "Production-ready CLI & background worker orchestration tool with Dead Letter Queue, real-time TUI, and Web Dashboard"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.27.0",
+    "rich>=15.0.0",
+    "fastapi>=0.139.2",
+    "uvicorn>=0.51.0",
+    "SQLAlchemy>=2.0.51",
+    "psycopg2-binary>=2.9.12",
+    "redis>=8.0.1",
+    "alembic>=1.18.5",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.2",
+    "python-dotenv>=1.2.2",
+    "psutil>=7.2.2",
+]
+
+[project.scripts]
+queuectl = "app.cli.app:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

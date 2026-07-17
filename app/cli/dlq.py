@@ -16,6 +16,7 @@ def dlq():
 
 @app.command()
 def list():
+    """View DLQ jobs."""
     db = SessionLocal()
     repository = JobRepository(db)
     queue = QueueService()
@@ -32,7 +33,8 @@ def list():
 
 
 @app.command()
-def retry(job_id: str):
+def retry(job_id: str = typer.Argument(help="ID of the dead job to retry")):
+    """Retry DLQ jobs."""
     db = SessionLocal()
     repository = JobRepository(db)
     queue = QueueService()

@@ -16,7 +16,7 @@ def set(
     key: str = typer.Argument(help="Config key (e.g. max-retries, backoff-base)"),
     value: str = typer.Argument(help="Value to set"),
 ):
-    """Set a configuration value."""
+    """Manage configuration (retry, backoff, etc.): set value."""
     try:
         config_manager.set_value(key, value)
         typer.echo(f"Set {key} = {value}")

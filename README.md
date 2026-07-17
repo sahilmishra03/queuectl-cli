@@ -78,12 +78,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install dependencies
+### 3. Install dependencies & package locally
 
 ```bash
 pip install -r requirements.txt
+pip install -e .
 pip install pytest pytest-cov httpx
 ```
+Installing with `-e .` registers the native `queuectl` CLI command across your terminal.
 
 ### 4. Configure environment variables
 
@@ -106,60 +108,60 @@ alembic upgrade head
 
 ## CLI Usage Guide
 
-Run all commands using `python -m app.cli.app <command> [options]`:
+Once installed with `pip install -e .`, you can run all commands directly using `queuectl` (or `python -m app.cli.app <command>`):
 
 ### Enqueueing Jobs
 
 ```powershell
 # Basic enqueue
-python -m app.cli.app enqueue "echo Hello World"
+queuectl enqueue "echo Hello World"
 
 # Enqueue with high priority (runs first) and 5-second timeout
-python -m app.cli.app enqueue "ping localhost -n 20" --priority 10 --timeout 5
+queuectl enqueue "ping localhost -n 20" --priority 10 --timeout 5
 
 # Enqueue scheduled job for a specific datetime
-python -m app.cli.app enqueue "echo Scheduled Task" --run-at "2026-07-17T20:30:00"
+queuectl enqueue "echo Scheduled Task" --run-at "2026-07-17T20:30:00"
 ```
 
 ### Starting the Worker
 
 ```powershell
 # Start worker processing loop
-python -u -m app.cli.worker start
+queuectl worker start
 ```
 
 ### Checking Status, List, and Logs
 
 ```powershell
 # View real-time queue status and execution metrics
-python -m app.cli.app status
+queuectl status
 
 # List all jobs or filter by state (pending, processing, completed, failed, dead, timed_out)
-python -m app.cli.app list --state completed
+queuectl list --state completed
 
 # View stdout and stderr logs for a specific job
-python -m app.cli.app logs <job-id>
+queuectl logs <job-id>
 ```
 
 ### Dead Letter Queue (DLQ) & Configuration
 
 ```powershell
 # List jobs in the DLQ
-python -m app.cli.app dlq list
+queuectl dlq list
 
 # Re-enqueue a dead job for retry
-python -m app.cli.app dlq retry <job-id>
+queuectl dlq retry <job-id>
 
 # Set global max retries or backoff base
-python -m app.cli.app config set max-retries 5
-python -m app.cli.app config list
+queuectl config set max-retries 5
+queuectl config list
 ```
 
 ### Launching the Web Dashboard
 
 ```powershell
 # Start the real-time FastAPI dashboard on port 8000
-python -m app.cli.app dashboard start --port 8000
+queuectl dashboard start --port 8000
 ```
 Open `http://localhost:8000` in your browser to view the interactive dashboard.
 
@@ -167,7 +169,7 @@ Open `http://localhost:8000` in your browser to view the interactive dashboard.
 
 ```powershell
 # Launch the real-time terminal monitor with auto-refreshing progress bars and RAM usage
-python -m app.cli.app monitor --refresh-interval 1.0
+queuectl monitor --refresh-interval 1.0
 ```
 
 ---

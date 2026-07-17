@@ -14,7 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN pip install --no-cache-dir -e .
+
 ENV PYTHONPATH=/app
 
 # Default command (can be overridden by docker-compose)
-CMD ["python", "-m", "app.cli.app"]
+CMD ["queuectl", "--help"]

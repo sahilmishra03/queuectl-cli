@@ -21,12 +21,42 @@ def main():
 
 @app.command()
 def enqueue(
-    command: str,
+    command: list[str] = typer.Argument(help="Job command or JSON payload"),
+    job_id: Optional[str] = typer.Option(None, "--id", help="Optional custom job ID"),
     max_retries: Optional[int] = typer.Option(None, help="Max retries (default from config)"),
     priority: int = typer.Option(0, help="Job priority (higher = runs first)"),
     timeout: Optional[int] = typer.Option(None, help="Timeout in seconds"),
     run_at: Optional[str] = typer.Option(None, help="Schedule job at ISO datetime (e.g. 2026-07-17T20:00:00)"),
 ):
+    """Add a new job to the queue."""
+    import json
+    raw_command = " ".join(command)
+    parsed_command = raw_command
+    if raw_command.strip().startswith("{") and raw_command.strip().endswith("}"):
+        payload = None
+        try:
+            payload = json.loads(raw_command)
+        except Exception:
+            import re
+            payload = {}
+            id_match = re.search(r'[\'"]?id[\'"]?\s*:\s*[\'"]?([^\'",}]+)[\'"]?', raw_command, re.IGNORECASE)
+            if id_match:
+                payload["id"] = id_match.group(1).strip()
+            cmd_match = re.search(r'[\'"]?(?:command|cmd)[\'"]?\s*:\s*[\'"]?(.+?)[\'"]?\s*(?:,[\'"]?(?:id|priority|timeout|run_at|max_retries)[\'"]?\s*:|\}$)', raw_command, re.IGNORECASE)
+            if cmd_match:
+                payload["command"] = cmd_match.group(1).strip()
+
+        if isinstance(payload, dict):
+            parsed_command = payload.get("command") or payload.get("cmd") or raw_command
+            if not job_id and ("id" in payload or "job_id" in payload):
+                job_id = str(payload.get("id") or payload.get("job_id"))
+            if priority == 0 and payload.get("priority") is not None:
+                priority = int(payload["priority"])
+            if timeout is None and payload.get("timeout") is not None:
+                timeout = int(payload["timeout"])
+            if run_at is None and payload.get("run_at") is not None:
+                run_at = str(payload["run_at"])
+
     if max_retries is None:
         max_retries = config_manager.get("max-retries")
 
@@ -44,11 +74,12 @@ def enqueue(
     service = JobService(repository, queue)
 
     job = service.enqueue(
-        command=command,
+        command=parsed_command,
         max_retries=max_retries,
         priority=priority,
         timeout=timeout,
         run_at=scheduled_at,
+        job_id=job_id,
     )
 
     msg = f"Job created: {job.id}"
@@ -65,6 +96,7 @@ def enqueue(
 
 @app.command()
 def dead(job_id: str):
+    """Manually move a job to the DEAD (DLQ) state."""
     db = SessionLocal()
     repository = JobRepository(db)
     job = repository.get_by_id(job_id)
@@ -84,7 +116,8 @@ def dead(job_id: str):
 
 @app.command()
 def status():
-    """Show summary of all job states, queue size, and execution metrics."""
+    """Show summary of all job states & active workers."""
+    import os
     db = SessionLocal()
     repository = JobRepository(db)
     queue = QueueService()
@@ -92,8 +125,17 @@ def status():
     stats = repository.get_stats()
     counts = stats["counts"]
 
+    active_workers = 0
+    if os.path.exists(".worker_pids"):
+        try:
+            with open(".worker_pids", "r") as f:
+                active_workers = len([p for p in f.read().splitlines() if p.strip()])
+        except Exception:
+            pass
+
     typer.echo("=== Queue Status ===")
     typer.echo(f"  Queue size:    {queue.size()}")
+    typer.echo(f"  Active workers: {active_workers}")
     typer.echo("")
     typer.echo("=== Job Summary ===")
     for state_name, count in counts.items():
@@ -113,7 +155,7 @@ def status():
 def list_jobs(
     state: Optional[str] = typer.Option(None, help="Filter by job state (pending, processing, completed, failed, dead, timed_out)"),
 ):
-    """List jobs, optionally filtered by state."""
+    """List jobs by state."""
     db = SessionLocal()
     repository = JobRepository(db)
 
@@ -128,13 +170,14 @@ def list_jobs(
     else:
         jobs = repository.list_all()
 
-    typer.echo(f"{'ID':<36} {'COMMAND':<18} {'STATE':<12} {'PRI':<5} {'ATTEMPTS':<10} {'DURATION':<10} {'ERROR'}")
-    typer.echo("-" * 120)
+    typer.echo(f"{'ID':<36} {'COMMAND':<38} {'STATE':<12} {'PRI':<5} {'ATTEMPTS':<10} {'DURATION':<10} {'ERROR'}")
+    typer.echo("-" * 140)
     for job in jobs:
-        error = (job.last_error or "")[:25]
-        duration = f"{job.duration_ms}ms" if job.duration_ms else "-"
+        cmd = (job.command[:35] + "...") if len(job.command) > 38 else job.command
+        error = (job.last_error or "").strip().split("\n")[0][:30]
+        duration = f"{job.duration_ms}ms" if job.duration_ms is not None else "-"
         typer.echo(
-            f"{job.id:<36} {job.command:<18} {job.state.value:<12} {job.priority:<5} "
+            f"{job.id:<36} {cmd:<38} {job.state.value:<12} {job.priority:<5} "
             f"{job.attempts:<10} {duration:<10} {error}"
         )
 

@@ -27,7 +27,10 @@ def run_worker():
 
 
 @app.command()
-def start(count: int = 1):
+def start(
+    count: int = typer.Option(1, "--count", "-c", help="Start one or more workers"),
+):
+    """Start one or more background worker processes."""
     typer.echo(f"Starting {count} worker(s)...")
     processes = []
     pids = []
@@ -54,6 +57,7 @@ def start(count: int = 1):
 
 @app.command()
 def stop():
+    """Stop running workers gracefully."""
     if not os.path.exists(".worker_pids"):
         typer.echo("No workers are currently running (no .worker_pids file).")
         return
